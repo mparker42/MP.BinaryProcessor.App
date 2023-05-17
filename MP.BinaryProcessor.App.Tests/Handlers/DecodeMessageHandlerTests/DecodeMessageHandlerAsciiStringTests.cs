@@ -1,0 +1,44 @@
+﻿using MP.BinaryProcessor.App.Models;
+
+namespace MP.BinaryProcessor.App.Tests.Handlers.DecodeMessageHandlerTests
+{
+    [TestClass]
+    public class DecodeMessageHandlerAsciiStringTests : BaseTests
+    {
+        private const string _fakeSchemaDisplayName = "fake schema item";
+
+        private readonly byte[] _allBytes = new byte[] { 0x32, 0xf2, 0x3a, 0x65, 0x23, 0x12, 0xaa };
+
+        private const string response = "some parsed response";
+
+        public override MessageSchemaItem[] GetMessageSchemaItems()
+        {
+            return new[] { new MessageSchemaItem { DisplayName = _fakeSchemaDisplayName, BinaryDataType = Enums.BinaryDataType.AsciiString, Length = 4, StartPosition = 2 } };
+        }
+
+        private bool ValidateRead(IEnumerable<byte> actual)
+        {
+            actual.Should().BeEquivalentTo(new[] { 0x3a, 0x65, 0x23, 0x12 });
+
+            return true;
+        }
+
+        [TestMethod]
+        public void HandlerReadsAsciiString()
+        {
+            ByteOperatorServiceMock.Setup(m => m.ConvertHexStringToByteArray(It.IsAny<string>())).Returns(() => _allBytes);
+
+            ByteOperatorServiceMock.Setup(m => m.ReadBytesAsAsciiString(It.IsAny<IEnumerable<byte>>())).Returns(() => response);
+
+            var input = "input string";
+
+            var decodeResult = ClassUnderTest.DecodeMessage(input);
+
+            decodeResult.Should().Contain($"{_fakeSchemaDisplayName}: {response}");
+
+            ByteOperatorServiceMock.Verify(x => x.ConvertHexStringToByteArray(input), Times.Once);
+
+            ByteOperatorServiceMock.Verify(m => m.ReadBytesAsAsciiString(It.Is<IEnumerable<byte>>(b => ValidateRead(b))));
+        }
+    }
+}

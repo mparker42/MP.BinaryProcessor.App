@@ -1,0 +1,22 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<h1>Message Sender</h1>
+
+This site is a simple message processor. Please provide your message in the input box and click the button to decode it.
+
+<form>
+    <label for="message">Message: </label>
+    <input type="text" id="message" @bind="_message" />
+
+    <button type="button" @onclick="SubmitData">Decode</button>
+
+    <hr />
+
+    <label for="handlerResponse">Response: </label>
+
+    <br />
+
+    <textarea id="handlerResponse" cols="100" rows="10" disabled @bind="_handlerResponse"></textarea>
+</form>
